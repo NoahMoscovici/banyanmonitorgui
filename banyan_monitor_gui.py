@@ -222,8 +222,8 @@ class MonitorGui(BanyanBase):
             self.topic_array.append(topic)
             self.topic_combobox['values'] = sorted(self.topic_array)
 
-        # increment the message count
-        self.message_count_int = self.message_count_int + 1
+            # increment the message count
+            self.message_count_int = self.message_count_int + 1
 
         self.current_time = datetime.now()
         self.elapsed_time = self.current_time - self.last_time
