@@ -1,7 +1,7 @@
 ## Documentation on banyan_monitor_gui.py
 
 #### How banyan_monitor_gui.py works
-This is a Tkinter GUI that allows a way to easily view messages going through the banyanrouter while being able to switch through topics in real-time. The GUI works by listening to every message on a certain banyanrouter.
+This is a Tkinter GUI that allows a way to easily view messages going through the banyanrouter while being able to switch through topics in real-time. The GUI works by listening to every message (or message on topic passed through) on a certain banyanrouter. The script then builds a dynamic topic list dropdown interface in the GUI that updates as messages with various topics come through. You are then able to narrow down the flood of messages being displayed by choosing a specific topic to listen to. Another way you can narrow down your search is by seraching for specific terms in the filter box. 
 
 
 #### How to run banyan_monitor_gui.py
@@ -17,3 +17,4 @@ python3 /banyan_monitor_gui.py -b 172.16.70.1
 ```
 
 #### What do the buttons on the GUI do?
+
