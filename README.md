@@ -16,5 +16,20 @@ or
 python3 /banyan_monitor_gui.py -b 172.16.70.1
 ```
 
-#### What do the buttons on the GUI do?
+#### What do the buttons on the GUI do/mean?
+![Image of GUI](https://github.com/NoahMoscovici/banyanmonitorgui/blob/master/banyan_monitor_gui_screenshot.png)
 
+**Filtered Messages Per Minute:**
+This displays the filtered messages (the ones showing up on the big message box) per minute by taking the number received in 3 seconds and multiplying it by 20. (If you recieve less messages less than every 3 seconds then the display will sometimes say 0 - this is the reason why)
+
+**Enter Keyword to Filter:**
+This box allows you to futher your message filter by seraching for specific keywords in the payload of the messages. In the image, the keyword WGAM is being searched along with the topic.
+
+**Topic:**
+This is a dropdown box that allows you to filter your messages by their topic. The message box gets dynamically updated as messages with a new topic come through. Selecting *ALL* in the dropdown will give you all of the messages, regardless of their topic. Selecting a topic will automatically clear the messages in the big message box.
+
+**Pause/Play**
+This button is used to pause/play the messages being displayed on the big message box. However, the pausing will not affect the *Filtered Messages Per Minute box.* (Once pressing pause, the button will be replaced with the play button and vise versa)
+
+**Clear Messages**
+This button will clear the messages being displayed in the big message box.
