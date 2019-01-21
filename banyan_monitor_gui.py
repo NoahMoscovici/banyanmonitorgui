@@ -2,7 +2,7 @@
 """
 
 
- Copyright (c) 2019 Noah Moscovici. All right reserved.
+ Copyright (c) 2019 Noah Moscovici, Palace Games. All right reserved.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
@@ -41,22 +41,8 @@ from python_banyan.banyan_base import BanyanBase
 YELLOW_COLOR= "LightGoldenrod1"
 GREEN_COLOR= "palegreen1"
 GRAY_COLOR= "snow3"
-RED_COLOR= "indian red"
 BLUE_COLOR="deep sky blue"
-ORANGE_COLOR= "dark orange"
-PURPLE_COLOR ="dark violet"
-WHITE_COLOR ="white"
-CYAN_COLOR ="cyan"
-MAGENTA_COLOR ="magenta2"
-BLACK_COLOR ="black"
-
 FONT= ("droidsans",8)
-RED_THRESH=90
-YELLOW_THRESH=80
-YELLOW_THRESH_LAG=100
-RED_THRESH_LAG=150
-
-WHITE_COLOR="snow"
 LARGE_FONT= ("droidsans",13)
 
 class MonitorGui(BanyanBase):
@@ -142,13 +128,13 @@ class MonitorGui(BanyanBase):
         self.clear_button = Button(self.button_frame, text="Clear Messages", height=1, background = BLUE_COLOR, font=LARGE_FONT, command=lambda: (self.clear_messages()))
         self.clear_button.grid(row=8, column=0, padx=5, pady=10, sticky="nw")
 
-
+        # clear the message display
         display_messages = ""
         self.update_message_box(display_messages)
+
+        # set variables for later message count calculations
         self.message_count_int = 0
-        self.message_count_min_int = 0
-        self.total_message_count_int = 0
-        self.total_message_count_min_int = 0
+        self.message_count_min = 0
         self.last_time = datetime.now()
         self.current_time = datetime.now()
 
@@ -232,11 +218,12 @@ class MonitorGui(BanyanBase):
         """
 
         if topic not in self.topic_array:
+            # the topic array get built dynamically based on incoming messages
             self.topic_array.append(topic)
             self.topic_combobox['values'] = sorted(self.topic_array)
 
         # increment the message count
-        self.total_message_count_int = self.total_message_count_int + 1
+        self.message_count_int = self.message_count_int + 1
 
         self.current_time = datetime.now()
         self.elapsed_time = self.current_time - self.last_time
@@ -244,19 +231,16 @@ class MonitorGui(BanyanBase):
         if int(self.elapsed_time.total_seconds()) > 3:
             # every 3 seconds take the humber of messages received and times it by 20 to find the estimated number of messages per minute
             self.message_count_min = self.message_count_int * 20
-            self.total_message_count_min = self.total_message_count_int * 20
 
             self.count.set(self.message_count_min)
-            self.total_count.set(self.total_message_count_min)
 
             self.message_count_int = 0
-            self.total_message_count_int = 0
             self.last_time = datetime.now()
 
         if topic == self.topic_name or self.topic_name == "ALL":
 
             if self.message_filter_box.get() in str(payload):
-                # only display the messages if it is under the topic(s) set
+                # only display the messages if it is under the topic set in dropdown
                 if self.topic_name == "ALL":
                     display_messages = "Topic: " + str(topic) + "\n" + "Payload: " + str(payload)
                 else:
