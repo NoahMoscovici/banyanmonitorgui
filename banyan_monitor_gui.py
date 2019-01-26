@@ -18,36 +18,35 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 """
-import traceback
 import argparse
-import logging
 import signal
-import time, threading
+import time
+import tkinter as tk
+import tkinter.scrolledtext as tkst
+import traceback
 from datetime import datetime
-import umsgpack
-import msgpack
-import msgpack_numpy as m
-import numpy as np
-import zmq
-import subprocess
-
 from tkinter import *
 from tkinter import ttk
-import tkinter.scrolledtext as tkst
-import tkinter as tk
+
+import msgpack
+import msgpack_numpy as m
+import umsgpack
+import zmq
 from python_banyan.banyan_base import BanyanBase
 
+YELLOW_COLOR = "LightGoldenrod1"
+GREEN_COLOR = "palegreen1"
+GRAY_COLOR = "snow3"
+BLUE_COLOR = "deep sky blue"
+FONT = ("droidsans", 8)
+LARGE_FONT = ("droidsans", 13)
 
-YELLOW_COLOR= "LightGoldenrod1"
-GREEN_COLOR= "palegreen1"
-GRAY_COLOR= "snow3"
-BLUE_COLOR="deep sky blue"
-FONT= ("droidsans",8)
-LARGE_FONT= ("droidsans",13)
 
 class MonitorGui(BanyanBase):
-    def __init__(self, back_plane_ip_address, subscriber_port='43125', publisher_port='43124',
-                 process_name=None, log=False,  quiet=False, loop_time=0.01, topic_names=''):
+    def __init__(self, back_plane_ip_address, subscriber_port='43125',
+                 publisher_port='43124',
+                 process_name=None, log=False, quiet=False,
+                 numpy=True, loop_time=0.01, topic_names=''):
         """
         :param back_plane_ip_address:
         :param subscriber_port:
@@ -58,7 +57,10 @@ class MonitorGui(BanyanBase):
         """
 
         # initialize the base class
-        super().__init__(back_plane_ip_address,  process_name=process_name, numpy=True)
+        super().__init__(back_plane_ip_address,
+                         subscriber_port=subscriber_port,
+                         publisher_port=publisher_port,
+                         process_name=process_name, numpy=numpy)
 
         self.quiet = quiet
         self.loop_time = loop_time
@@ -70,11 +72,11 @@ class MonitorGui(BanyanBase):
         # make an array of topics based of the list passed by spliting it by commas
         topic_array = topic_names[0:420].split(',')
 
-        for t in topic_array:
-            print('        Subscribed to topic: ' + t)
-            # set the topic subscribing to for each item in array
-            self.set_subscriber_topic(t)
-
+        if topic_array != ['']:
+            for t in topic_array:
+                print('        Subscribed to topic: ' + t)
+                # set the topic subscribing to for each item in array
+                self.set_subscriber_topic(t)
 
         self.master = Tk()
 
@@ -83,12 +85,12 @@ class MonitorGui(BanyanBase):
 
         # set up the frames for the buttons and message display
         self.button_frame = Frame(self.master)
-        self.button_frame.pack(side = LEFT)
+        self.button_frame.pack(side=LEFT)
         self.message_frame = Frame(self.master)
-        self.message_frame.pack(side = RIGHT)
+        self.message_frame.pack(side=RIGHT)
 
         # message display
-        self.message_box = tkst.ScrolledText(self.message_frame, height = 60, width = 175, bg = GRAY_COLOR)
+        self.message_box = tkst.ScrolledText(self.message_frame, height=60, width=175, bg=GRAY_COLOR)
         self.message_box.grid(row=0, column=0, padx=5, sticky="e")
 
         # message count label and display
@@ -97,14 +99,16 @@ class MonitorGui(BanyanBase):
         self.message_count_label = Label(self.button_frame, text="Filtered Messages per Minute:", font=LARGE_FONT)
         self.message_count_label.grid(row=2, column=0, padx=5, pady=0, sticky="nw")
         self.count = StringVar()
-        self.message_count = Entry(self.button_frame, text= self.count, background = GRAY_COLOR, font=LARGE_FONT, width=10, state="disabled")
+        self.message_count = Entry(self.button_frame, text=self.count, background=GRAY_COLOR, font=LARGE_FONT, width=10,
+                                   state="disabled")
         self.message_count.grid(row=3, column=0, padx=5, pady=5, sticky="nw")
         self.count.set(" ")
 
         # message filter label and display
         self.message_filter_label = Label(self.button_frame, text="Enter Keyword to Filter:", font=LARGE_FONT)
         self.message_filter_label.grid(row=4, column=0, padx=5, sticky="nw")
-        self.message_filter_box = Entry(self.button_frame, text="Topic", width=25, background = GRAY_COLOR, font=LARGE_FONT)
+        self.message_filter_box = Entry(self.button_frame, text="Topic", width=25, background=GRAY_COLOR,
+                                        font=LARGE_FONT)
         self.message_filter_box.grid(row=5, column=0, padx=5, sticky="nw")
 
         # topic dropdown
@@ -113,7 +117,7 @@ class MonitorGui(BanyanBase):
         self.topic_array = ['ALL']
         self.topic_drop = ttk.Labelframe(self.button_frame, text='Topic')
         self.topic_drop.grid(in_=self.button_frame, pady=5, padx=5, row=6, column=0, sticky="sw")
-        self.topic_combobox = ttk.Combobox(self.topic_drop, textvariable = self.topic_val, width="30")
+        self.topic_combobox = ttk.Combobox(self.topic_drop, textvariable=self.topic_val, width="30")
         self.topic_combobox['values'] = self.topic_array
         self.topic_combobox.bind('<<ComboboxSelected>>', self.topicselect)
         self.topic_combobox.current(0)
@@ -121,11 +125,13 @@ class MonitorGui(BanyanBase):
 
         # pause/play button
         self.paused = False
-        self.pp_button = Button(self.button_frame, text="Pause", height=1, background = YELLOW_COLOR, font=LARGE_FONT, command=lambda: (self.pp_chat()))
+        self.pp_button = Button(self.button_frame, text="Pause", height=1, background=YELLOW_COLOR, font=LARGE_FONT,
+                                command=lambda: (self.pp_chat()))
         self.pp_button.grid(row=7, column=0, padx=5, pady=10, sticky="nw")
 
         # clear button
-        self.clear_button = Button(self.button_frame, text="Clear Messages", height=1, background = BLUE_COLOR, font=LARGE_FONT, command=lambda: (self.clear_messages()))
+        self.clear_button = Button(self.button_frame, text="Clear Messages", height=1, background=BLUE_COLOR,
+                                   font=LARGE_FONT, command=lambda: (self.clear_messages()))
         self.clear_button.grid(row=8, column=0, padx=5, pady=10, sticky="nw")
 
         # clear the message display
@@ -137,26 +143,25 @@ class MonitorGui(BanyanBase):
         self.message_count_min = 0
         self.last_time = datetime.now()
         self.current_time = datetime.now()
+        self.elapsed_time = None
 
         self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.master.after(1, self.get_message)
         self.master.mainloop()
-
 
     def topicselect(self, event=None):
         # change the var topic_name to the selected topic
         self.topic_name = event.widget.get()
         self.clear_messages()
 
-
     def pp_chat(self):
         # check whether the chat is paused or playing and change it
-        if self.paused == True:
+        if self.paused:
             self.paused = False
-            self.pp_button.configure(text="Pause", background = YELLOW_COLOR)
+            self.pp_button.configure(text="Pause", background=YELLOW_COLOR)
         else:
             self.paused = True
-            self.pp_button.configure(text="Play", background = GREEN_COLOR)
+            self.pp_button.configure(text="Play", background=GREEN_COLOR)
 
     def clear_messages(self):
         # clear the messages in the display
@@ -164,10 +169,9 @@ class MonitorGui(BanyanBase):
         self.message_box.delete('1.0', tk.END)
         self.message_box.configure(state='disabled')
 
-
     def update_message_box(self, message):
         # update the display with incoming messages
-        if self.paused == False:
+        if not self.paused:
             self.message_box.configure(state='normal')
             self.message_box.insert(tk.END, message + '\n')
             self.message_box.yview(tk.END)
@@ -190,8 +194,8 @@ class MonitorGui(BanyanBase):
                     self.master.after(1, self.get_message)
                 else:
                     self.incoming_message_processing(data[0].decode(), umsgpack.unpackb(data[1]))
-            except:
-                    self.error_reporting()
+            except Exception:
+                self.error_reporting()
 
         except zmq.error.Again:
             try:
@@ -200,15 +204,13 @@ class MonitorGui(BanyanBase):
 
             except KeyboardInterrupt:
                 self.clean_up()
-            except:
+            except Exception:
                 self.error_reporting()
 
     def error_reporting(self):
-        '''used to send a stack trace when there is an error'''
+        """used to send a stack trace when there is an error"""
         exc_type, exc_value, exc_traceback = sys.exc_info()
         print(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
-
-
 
     def incoming_message_processing(self, topic, payload):
         """
@@ -229,7 +231,8 @@ class MonitorGui(BanyanBase):
         self.elapsed_time = self.current_time - self.last_time
 
         if int(self.elapsed_time.total_seconds()) > 3:
-            # every 3 seconds take the humber of messages received and times it by 20 to find the estimated number of messages per minute
+            # every 3 seconds take the number of messages received and
+            # times it by 20 to find the estimated number of messages per minute
             self.message_count_min = self.message_count_int * 20
 
             self.count.set(self.message_count_min)
@@ -248,7 +251,6 @@ class MonitorGui(BanyanBase):
 
                 self.message_count_int = self.message_count_int + 1
                 self.update_message_box(display_messages)
-
 
     def on_closing(self):
         """
@@ -269,14 +271,24 @@ class MonitorGui(BanyanBase):
         self.context.term()
         sys.exit(0)
 
+
 def start_gui():
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", dest="back_plane_ip_address", default="",
-                        help="None or IP address used by Back Plane", required=True)
+                        help="None or IP address used by Back Plane",
+                        )
     parser.add_argument("-l", dest="log", default=False,
                         help="Set to True to turn logging on")
-    parser.add_argument("-n", dest="process_name", default="MasterGui", help="Process Name on Banner")
-    parser.add_argument("-q", dest="quiet", default=False, help="Set to True to run without printing output")
+    parser.add_argument("-m", dest="numpy", default="True",
+                        help="Set to False If Not Using Numpy")
+    parser.add_argument("-n", dest="process_name", default="MasterGui",
+                        help="Process Name on Banner")
+    parser.add_argument("-p", dest="publisher_port", default='43124',
+                        help="Publisher IP port")
+    parser.add_argument("-q", dest="quiet", default=False,
+                        help="Set to True to run without printing output")
+    parser.add_argument("-s", dest="subscriber_port", default='43125',
+                        help="Subscriber IP port")
     parser.add_argument("-t", dest="topic_names", default="")
 
     args = parser.parse_args()
@@ -298,6 +310,14 @@ def start_gui():
 
     kw_options['topic_names'] = args.topic_names
 
+    kw_options['publisher_port'] = args.publisher_port
+
+    kw_options['subscriber_port'] = args.subscriber_port
+
+    if args.numpy == "True":
+        kw_options['numpy'] = True
+    else:
+        kw_options['numpy'] = False
 
     my_monitor_gui = MonitorGui(**kw_options)
 
@@ -306,12 +326,14 @@ def start_gui():
     def signal_handler(signal, frame):
         print('Control-C detected. See you soon.')
 
-        close_gui()
+        # close_gui()
+        my_monitor_gui.master.destroy()
         sys.exit(0)
 
     # listen for SIGINT
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
+
 
 if __name__ == '__main__':
     try:
