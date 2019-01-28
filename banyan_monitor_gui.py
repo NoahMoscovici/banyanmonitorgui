@@ -43,26 +43,28 @@ LARGE_FONT = ("droidsans", 13)
 
 
 class MonitorGui(BanyanBase):
-    def __init__(self, back_plane_ip_address, subscriber_port='43125',
+    def __init__(self, back_plane_ip_address,
+                 subscriber_port='43125',
                  publisher_port='43124',
-                 process_name=None, log=False, quiet=False,
-                 numpy=True, loop_time=0.01, topic_names=''):
+                 process_name=None, numpy=True,
+                 loop_time=0.01, topic_names=''):
         """
         :param back_plane_ip_address:
         :param subscriber_port:
         :param publisher_port:
         :param process_name:
+        :param numpy:
         :param loop_time:
-        :param log:
+        :param topic_names:
         """
 
         # initialize the base class
         super().__init__(back_plane_ip_address,
                          subscriber_port=subscriber_port,
                          publisher_port=publisher_port,
-                         process_name=process_name, numpy=numpy)
+                         process_name=process_name,
+                         numpy=numpy)
 
-        self.quiet = quiet
         self.loop_time = loop_time
 
         # allow time for connection
@@ -72,11 +74,10 @@ class MonitorGui(BanyanBase):
         # make an array of topics based of the list passed by spliting it by commas
         topic_array = topic_names[0:420].split(',')
 
-        if topic_array != ['']:
-            for t in topic_array:
-                print('        Subscribed to topic: ' + t)
-                # set the topic subscribing to for each item in array
-                self.set_subscriber_topic(t)
+        for t in topic_array:
+            print('        Subscribed to topic: ' + t)
+            # set the topic subscribing to for each item in array
+            self.set_subscriber_topic(t)
 
         self.master = Tk()
 
@@ -139,6 +140,7 @@ class MonitorGui(BanyanBase):
         self.update_message_box(display_messages)
 
         # set variables for later message count calculations
+        self.master.after(100, self.get_message)
         self.message_count_int = 0
         self.message_count_min = 0
         self.last_time = datetime.now()
@@ -274,19 +276,15 @@ class MonitorGui(BanyanBase):
 
 def start_gui():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-b", dest="back_plane_ip_address", default="",
+    parser.add_argument("-b", dest="back_plane_ip_address", default="127.0.0.1",
                         help="None or IP address used by Back Plane",
                         )
-    parser.add_argument("-l", dest="log", default=False,
-                        help="Set to True to turn logging on")
     parser.add_argument("-m", dest="numpy", default="True",
                         help="Set to False If Not Using Numpy")
     parser.add_argument("-n", dest="process_name", default="MasterGui",
                         help="Process Name on Banner")
     parser.add_argument("-p", dest="publisher_port", default='43124',
                         help="Publisher IP port")
-    parser.add_argument("-q", dest="quiet", default=False,
-                        help="Set to True to run without printing output")
     parser.add_argument("-s", dest="subscriber_port", default='43125',
                         help="Subscriber IP port")
     parser.add_argument("-t", dest="topic_names", default="")
@@ -294,18 +292,8 @@ def start_gui():
     args = parser.parse_args()
     kw_options = {}
 
-    if args.back_plane_ip_address != 'None':
-        kw_options['back_plane_ip_address'] = args.back_plane_ip_address
+    kw_options['back_plane_ip_address'] = args.back_plane_ip_address
 
-    if args.log == 'True':
-        kw_options['log'] = True
-    else:
-        kw_options['log'] = False
-
-    if args.quiet == 'True':
-        kw_options['quiet'] = True
-    else:
-        kw_options['quiet'] = False
     kw_options['process_name'] = args.process_name
 
     kw_options['topic_names'] = args.topic_names
@@ -326,7 +314,7 @@ def start_gui():
     def signal_handler(signal, frame):
         print('Control-C detected. See you soon.')
 
-        # close_gui()
+        close_gui()
         my_monitor_gui.master.destroy()
         sys.exit(0)
 
