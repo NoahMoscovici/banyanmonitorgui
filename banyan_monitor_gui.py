@@ -71,6 +71,9 @@ class MonitorGui(BanyanBase):
         time.sleep(.03)
         m.patch()
 
+        self.topic_array = ['ALL']
+
+
         # make an array of topics based of the list passed by spliting it by commas
         topic_array = topic_names[0:420].split(',')
 
@@ -78,6 +81,7 @@ class MonitorGui(BanyanBase):
             print('        Subscribed to topic: ' + t)
             # set the topic subscribing to for each item in array
             self.set_subscriber_topic(t)
+            self.topic_array.append(t)
 
         self.master = Tk()
 
@@ -115,7 +119,6 @@ class MonitorGui(BanyanBase):
         # topic dropdown
         self.topic_name = "ALL"
         self.topic_val = StringVar()
-        self.topic_array = ['ALL']
         self.topic_drop = ttk.Labelframe(self.button_frame, text='Topic')
         self.topic_drop.grid(in_=self.button_frame, pady=5, padx=5, row=6, column=0, sticky="sw")
         self.topic_combobox = ttk.Combobox(self.topic_drop, textvariable=self.topic_val, width="30")
