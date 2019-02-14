@@ -318,8 +318,6 @@ def start_gui():
     # noinspection PyShadowingNames,PyUnusedLocal,PyUnusedLocal
     def signal_handler(signal, frame):
         print('Control-C detected. See you soon.')
-
-        # close_gui()
         my_monitor_gui.master.destroy()
         sys.exit(0)
 
