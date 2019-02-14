@@ -30,7 +30,6 @@ from tkinter import ttk
 
 import msgpack
 import msgpack_numpy as m
-# import umsgpack
 import zmq
 from python_banyan.banyan_base import BanyanBase
 
@@ -143,7 +142,6 @@ class MonitorGui(BanyanBase):
         self.update_message_box(display_messages)
 
         # set variables for later message count calculations
-        # self.master.after(100, self.get_message)
         self.message_count_int = 0
         self.message_count_min = 0
         self.last_time = datetime.now()
@@ -207,8 +205,6 @@ class MonitorGui(BanyanBase):
         except zmq.error.Again:
             try:
                 self.master.after(1, self.get_message)
-                # time.sleep(self.loop_time)
-
             except KeyboardInterrupt:
                 self.clean_up()
             except Exception:
