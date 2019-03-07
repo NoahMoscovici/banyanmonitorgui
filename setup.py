@@ -25,7 +25,7 @@ setup(
     url='https://github.com/NoahMoscovici/banyanmonitorgui',
     license='GNU Affero General Public License v3 or later (AGPLv3+)',
     author='Noah Moscovici',
-    author_email='',
+    author_email='noah.moscovici@gmail.com',
     description='A Graphical Monitor For Banyan Messages',
     long_description=long_description,
     long_description_content_type='text/markdown',
