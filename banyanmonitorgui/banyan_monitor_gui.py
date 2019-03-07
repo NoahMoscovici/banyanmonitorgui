@@ -30,7 +30,6 @@ from tkinter import ttk
 
 import msgpack
 import msgpack_numpy as m
-import umsgpack
 import zmq
 from python_banyan.banyan_base import BanyanBase
 
@@ -86,7 +85,7 @@ class MonitorGui(BanyanBase):
         self.master = Tk()
 
         # set the title of the window
-        self.master.wm_title("Banyan Monitor on the " + back_plane_ip_address + "-banyanrouter")
+        self.master.wm_title("Banyan Monitor on the " + self.back_plane_ip_address + "-banyanrouter")
 
         # set up the frames for the buttons and message display
         self.button_frame = Frame(self.master)
@@ -143,7 +142,6 @@ class MonitorGui(BanyanBase):
         self.update_message_box(display_messages)
 
         # set variables for later message count calculations
-        self.master.after(100, self.get_message)
         self.message_count_int = 0
         self.message_count_min = 0
         self.last_time = datetime.now()
@@ -198,15 +196,15 @@ class MonitorGui(BanyanBase):
                     self.incoming_message_processing(data[0].decode(), payload)
                     self.master.after(1, self.get_message)
                 else:
-                    self.incoming_message_processing(data[0].decode(), umsgpack.unpackb(data[1]))
+                    self.incoming_message_processing(data[0].decode(), msgpack.unpackb(data[1]))
+                    self.master.after(1, self.get_message)
+
             except Exception:
                 self.error_reporting()
 
         except zmq.error.Again:
             try:
                 self.master.after(1, self.get_message)
-                time.sleep(self.loop_time)
-
             except KeyboardInterrupt:
                 self.clean_up()
             except Exception:
@@ -279,7 +277,7 @@ class MonitorGui(BanyanBase):
 
 def start_gui():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-b", dest="back_plane_ip_address", default="127.0.0.1",
+    parser.add_argument("-b", dest="back_plane_ip_address", default="None",
                         help="None or IP address used by Back Plane",
                         )
     parser.add_argument("-m", dest="numpy", default="True",
@@ -290,10 +288,14 @@ def start_gui():
                         help="Publisher IP port")
     parser.add_argument("-s", dest="subscriber_port", default='43125',
                         help="Subscriber IP port")
-    parser.add_argument("-t", dest="topic_names", default="")
+    parser.add_argument("-t", dest="topic_names", default="",
+                        help="Separate topic names with commas")
 
     args = parser.parse_args()
     kw_options = {}
+
+    if args.back_plane_ip_address == 'None':
+        args.back_plane_ip_address = None
 
     kw_options['back_plane_ip_address'] = args.back_plane_ip_address
 
@@ -316,8 +318,6 @@ def start_gui():
     # noinspection PyShadowingNames,PyUnusedLocal,PyUnusedLocal
     def signal_handler(signal, frame):
         print('Control-C detected. See you soon.')
-
-        close_gui()
         my_monitor_gui.master.destroy()
         sys.exit(0)
 
