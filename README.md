@@ -17,7 +17,7 @@ python3 /banyan_monitor_gui.py -b 172.16.70.1
 ```
 
 #### What do the buttons on the GUI do/mean?
-![Image of GUI](https://github.com/NoahMoscovici/banyanmonitorgui/blob/master/banyan_monitor_gui_screenshot.png)
+![Image of GUI](https://github.com/NoahMoscovici/banyanmonitorgui/blob/master/banyanmonitorgui.png)
 
 **Filtered Messages Per Minute:**
 This displays the filtered messages (the ones showing up on the big message box) per minute by taking the number received in 3 second intervals and multiplying it by 20. (If you recieve less than one message every 3 seconds, the display will sometimes say 0)
