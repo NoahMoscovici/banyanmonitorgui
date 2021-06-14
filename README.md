@@ -11,7 +11,7 @@ While running banyan_monitor_gui.py, you must pass the IP address of the python-
 
 For example, the following might be run if the python-banyan backplane were to be running on the 172.16.70.1 IP Address:
 ```
-python3 /banyan_monitor_gui.py -b 172.16.70.1 -t topic1,topic2,topic3
+python3 banyan_monitor_gui.py -b 172.16.70.1 -t topic1,topic2,topic3
 ```
 
 #### Utilities provided through the banyan_monitor_gui.py interface
