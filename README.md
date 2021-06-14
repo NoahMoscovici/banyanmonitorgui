@@ -1,11 +1,7 @@
 ## Documentation on banyan_monitor_gui.py
-This GUI is built off the python-banyan framework, by Alan Yorinks. See [here](https://mryslab.github.io/python_banyan/) for in-depth documentation and setup.
+banyan_monitor_gui.py is a Tkinter GUI that allows a way to easily view messages going through the banyanrouter while being able to switch through topics in real-time. banyan_monitor_gui.py listens to, parses, and organizes messages being sent through a Python Banyan Backplane to present information in a clean and intuitive manner. The project is built off the Python Banyan framework, by Alan Yorinks. *See [here](https://mryslab.github.io/python_banyan/) for in-depth documentation and setup of Python Banyan.*
 
-#### How banyan_monitor_gui.py works
-This is a Tkinter GUI that allows a way to easily view messages going through the banyanrouter while being able to switch through topics in real-time. The GUI works by listening to every message (or the messages for the topic(s) passed through) on a certain banyanrouter. The script then builds a dynamic topic list dropdown interface in the GUI that updates as messages with various topics come through. You are then able to narrow down the flood of messages being displayed by choosing a specific topic to listen to. Another way you can narrow down your search is by searching for specific terms in the filter box. 
-
-
-#### Running of banyan_monitor_gui.py (and arguments)
+#### How to run banyan_monitor_gui.py
 While running banyan_monitor_gui.py, you must pass the IP address of the python-banyan backplane you wish to listen to. However, Tkinter's fixed loop time may mean that this GUI cannot pick up every message in the event too many messages are being sent (around 10,000 messages a minute). You can fix such an issue by limiting the topics the GUI will listen to through passing a list of topics as an argument. This argument is optional, and if not set will listen to all topics on the backplane (this is recommended to backplanes handling less than 10,000 messages a minute).
 
 For example, the following might be run if the python-banyan backplane were to be running on the 172.16.70.1 IP Address:
